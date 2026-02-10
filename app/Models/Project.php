@@ -18,6 +18,13 @@ class Project extends Model
         'creator_id',
     ];
 
+    protected static function booted(): void
+    {
+        self::creating(static function (Project $project): void {
+            $project->creator_id = auth('sanctum')->user()->id;
+        });
+    }
+
     public function configurations(): HasMany
     {
         return $this->hasMany(ProjectConfiguration::class);
