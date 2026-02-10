@@ -24,7 +24,7 @@ class ProjectController extends ApiController
      */
     public function store(CreateProjectRequest $request)
     {
-        $project = Project::create($request->all());
+        $project = Project::create($request->validated());
 
         return Response::json(new ProjectResource($project), ResponseCode::HTTP_CREATED);
     }
@@ -44,7 +44,7 @@ class ProjectController extends ApiController
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        $project->update($request->all());
+        $project->update($request->validated());
 
         return Response::json(new ProjectResource($project->refresh()), ResponseCode::HTTP_OK);
     }

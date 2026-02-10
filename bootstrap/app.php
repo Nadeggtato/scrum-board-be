@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         ->controller(ProjectController::class)
                         ->group(base_path('routes/api/projects.php'));
 
-                    Route::prefix('sprints')
+                    Route::prefix('projects/{project}/sprints')
                         ->name('sprints.')
                         ->controller(SprintController::class)
                         ->group(base_path('routes/api/sprints.php'));
