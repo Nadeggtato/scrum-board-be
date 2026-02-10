@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role as RoleModel;
 use Arr;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -13,7 +13,6 @@ class RolePermissionSeeder extends Seeder
         'create-project',
         'view-project',
         'update-project',
-        'delete-project',
     ];
 
     private const PROJECT_MEMBER_PERMISSIONS = [
@@ -31,28 +30,27 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $roles = ['Super Admin', 'Project Manager', 'Developer'];
         $managerPermissions = [self::PROJECT_PERMISSIONS, self::PROJECT_MEMBER_PERMISSIONS];
 
-        Role::truncate();
+        RoleModel::truncate();
         Permission::truncate();
 
         foreach (Arr::collapse(self::ALL_PERMISSIONS) as $permission) {
             Permission::create(['name' => $permission]);
         }
 
-        foreach ($roles as $role) {
-            $createdRole = Role::create(['name' => $role]);
+        foreach (RoleModel::ROLES as $role) {
+            $createdRole = RoleModel::create(['name' => $role]);
 
             switch ($role) {
-                case 'Project Manager':
+                case RoleModel::PROJECT_MANAGER:
                     $permissions = Permission::whereIn(
                         'name',
                         Arr::collapse($managerPermissions)
                     )->get();
                     $createdRole->syncPermissions($permissions);
                     break;
-                case 'Developer':
+                case RoleModel::DEVELOPER:
                     break;
             }
         }
