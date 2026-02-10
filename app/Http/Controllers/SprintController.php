@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateSprintRequest;
+use App\Http\Requests\UpdateSprintRequest;
 use App\Http\Resources\SprintResource;
 use App\Models\Project;
 use App\Models\Sprint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
@@ -39,26 +39,12 @@ class SprintController extends ApiController
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sprint $sprint)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Sprint $sprint)
+    public function update(UpdateSprintRequest $request, Project $project, Sprint $sprint)
     {
-        //
-    }
+        $sprint->update($request->validated());
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Sprint $sprint)
-    {
-        //
+        return Response::json(new SprintResource($sprint->refresh()), ResponseCode::HTTP_OK);
     }
 }

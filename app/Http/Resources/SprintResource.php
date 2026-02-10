@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Log;
 
 class SprintResource extends JsonResource
 {
@@ -15,8 +14,6 @@ class SprintResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        Log::info($this->start);
-
         return [
             'id' => $this->id,
             'name' => $this->name,

@@ -5,14 +5,18 @@ namespace App\Http\Requests;
 use App\Models\Sprint;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateSprintRequest extends FormRequest
+class UpdateSprintRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', [Sprint::class, $this->route('project')]);
+        return $this->user()->can('update', [
+            Sprint::class,
+            $this->route('project'),
+            $this->route('sprint'),
+        ]);
     }
 
     /**

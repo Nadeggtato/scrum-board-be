@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\User;
+use App\Support\ProjectMemberChecker;
 
 class SprintPolicy
 {
@@ -29,15 +30,17 @@ class SprintPolicy
      */
     public function create(User $user, Project $project): bool
     {
-        return $user->can('create-sprint');
+        return $user->can('create-sprint') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Sprint $sprint): bool
+    public function update(User $user, Project $project, Sprint $sprint): bool
     {
-        return false;
+        return $user->can('update-sprint') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**
