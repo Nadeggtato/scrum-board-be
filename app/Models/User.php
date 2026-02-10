@@ -58,6 +58,8 @@ class User extends Authenticatable
 
     public function projects(): BelongsToMany
     {
-        return $this->belongsToMany(Project::class, 'project_members');
+        return $this->belongsToMany(Project::class, 'project_members')
+            ->using(ProjectMember::class)
+            ->wherePivotNull('deleted_at');
     }
 }
