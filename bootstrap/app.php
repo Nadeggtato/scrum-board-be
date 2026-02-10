@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SprintController;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,10 +14,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             Route::middleware(['api', 'auth:sanctum'])
-                ->prefix('api/projects')
-                ->name('projects.')
-                ->controller(ProjectController::class)
-                ->group(base_path('routes/api/projects.php'));
+                ->prefix('api')
+                ->group(function () {
+                    Route::prefix('projects')
+                        ->name('projects.')
+                        ->controller(ProjectController::class)
+                        ->group(base_path('routes/api/projects.php'));
+
+                    Route::prefix('sprints')
+                        ->name('sprints.')
+                        ->controller(SprintController::class)
+                        ->group(base_path('routes/api/sprints.php'));
+                });
+
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
