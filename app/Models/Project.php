@@ -14,6 +14,7 @@ class Project extends Model
 
     const ALLOWED_INCLUDES = [
         'creator',
+        'members',
     ];
 
     protected $fillable = [
@@ -41,7 +42,7 @@ class Project extends Model
 
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(ProjectMember::class);
+        return $this->belongsToMany(User::class, 'project_members');
     }
 
     public function sprints(): HasMany
