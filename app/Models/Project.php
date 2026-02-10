@@ -12,6 +12,10 @@ class Project extends Model
 {
     use HasUuids;
 
+    const ALLOWED_INCLUDES = [
+        'creator',
+    ];
+
     protected $fillable = [
         'name',
         'is_active',
