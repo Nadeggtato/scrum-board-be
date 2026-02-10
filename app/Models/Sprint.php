@@ -10,6 +10,11 @@ class Sprint extends Model
 {
     use HasUuids;
 
+    const ALLOWED_INCLUDES = [
+        'project',
+        'tasks',
+    ];
+
     protected $fillable = [
         'name',
         'start',

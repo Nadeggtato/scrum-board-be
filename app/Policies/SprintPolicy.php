@@ -20,9 +20,10 @@ class SprintPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Sprint $sprint): bool
+    public function view(User $user, Project $project, Sprint $sprint): bool
     {
-        return false;
+        return $user->can('view-sprints') &&
+                   app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**

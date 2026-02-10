@@ -19,6 +19,7 @@ class SprintResource extends JsonResource
             'name' => $this->name,
             'start' => $this->start,
             'end' => $this->end,
+            'project' => new ProjectResource($this->whenLoaded('project')),
         ];
     }
 }

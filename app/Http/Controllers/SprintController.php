@@ -33,9 +33,11 @@ class SprintController extends ApiController
     /**
      * Display the specified resource.
      */
-    public function show(Sprint $sprint)
+    public function show(Project $project, Sprint $sprint)
     {
-        //
+        $sprint = $this->loadIncludes($sprint, request(), Sprint::ALLOWED_INCLUDES);
+
+        return Response::json(new SprintResource($sprint), ResponseCode::HTTP_OK);
     }
 
     /**
