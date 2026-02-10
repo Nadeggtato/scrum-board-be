@@ -14,8 +14,14 @@ class UserStory extends Model
     protected $fillable = [
         'description',
         'story_points',
+        'project_id',
         'sprint_id',
     ];
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
 
     public function sprint(): BelongsTo
     {

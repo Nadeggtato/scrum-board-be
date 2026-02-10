@@ -12,7 +12,6 @@ class Sprint extends Model
 
     const ALLOWED_INCLUDES = [
         'project',
-        'tasks',
     ];
 
     protected $fillable = [
