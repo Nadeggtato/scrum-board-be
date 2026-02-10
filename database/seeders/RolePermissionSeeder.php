@@ -20,9 +20,16 @@ class RolePermissionSeeder extends Seeder
         'remove-project-member',
     ];
 
+    private const SPRINT_PERMISSIONS = [
+        'view-sprints',
+        'create-sprint',
+        'update-sprint',
+    ];
+
     private const ALL_PERMISSIONS = [
         self::PROJECT_PERMISSIONS,
         self::PROJECT_MEMBER_PERMISSIONS,
+        self::SPRINT_PERMISSIONS,
     ];
 
     /**
@@ -30,7 +37,7 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $managerPermissions = [self::PROJECT_PERMISSIONS, self::PROJECT_MEMBER_PERMISSIONS];
+        $managerPermissions = [self::PROJECT_PERMISSIONS, self::PROJECT_MEMBER_PERMISSIONS, self::SPRINT_PERMISSIONS];
 
         RoleModel::truncate();
         Permission::truncate();
