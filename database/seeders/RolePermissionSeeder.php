@@ -26,6 +26,13 @@ class RolePermissionSeeder extends Seeder
         'update-sprint',
     ];
 
+    private const USER_STORY_PERMISSIONS = [
+        'view-user-stories',
+        'create-user-story',
+        'update-user-story',
+        'delete-user-story',
+    ];
+
     private const ALL_PERMISSIONS = [
         self::PROJECT_PERMISSIONS,
         self::PROJECT_MEMBER_PERMISSIONS,
