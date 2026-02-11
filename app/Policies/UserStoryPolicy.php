@@ -37,9 +37,10 @@ class UserStoryPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, UserStory $userStory): bool
+    public function update(User $user, Project $project, UserStory $userStory): bool
     {
-        return false;
+        return $user->can('update-user-story') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**

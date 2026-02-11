@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserStoryRequest;
+use App\Http\Requests\UpdateUserStoryRequest;
 use App\Http\Resources\UserStoryResource;
 use App\Models\Project;
 use App\Models\UserStory;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
@@ -39,19 +39,16 @@ class UserStoryController extends ApiController
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(UserStory $userStory)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, UserStory $userStory)
+    public function update(UpdateUserStoryRequest $request, Project $project, UserStory $userStory)
     {
-        //
+        $userStory->update([...$request->validated(), 'project_id' => $project->id]);
+
+        return Response::json(
+            new UserStoryResource($userStory->refresh()),
+            ResponseCode::HTTP_CREATED
+        );
     }
 
     /**
