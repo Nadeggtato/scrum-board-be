@@ -20,9 +20,11 @@ class UserStoryPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, UserStory $userStory): bool
+    public function view(User $user, Project $project, UserStory $userStory): bool
     {
-        return false;
+        return $user->can('create-user-story') &&
+            app(ProjectMemberChecker::class)($project, $user) &&
+            $project->id === $userStory->project_id;
     }
 
     /**

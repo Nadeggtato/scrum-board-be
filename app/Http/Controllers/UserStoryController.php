@@ -33,9 +33,12 @@ class UserStoryController extends ApiController
     /**
      * Display the specified resource.
      */
-    public function show(UserStory $userStory)
+    public function show(Project $project, UserStory $userStory)
     {
-        //
+        $this->authorize('view', [UserStory::class, $project, $userStory]);
+        $userStory = $this->loadIncludes($userStory, request(), UserStory::ALLOWED_INCLUDES);
+
+        return Response::json(new UserStoryResource($userStory), ResponseCode::HTTP_OK);
     }
 
     /**
