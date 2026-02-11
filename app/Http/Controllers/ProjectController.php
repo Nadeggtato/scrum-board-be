@@ -6,6 +6,7 @@ use App\Http\Requests\CreateProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
+use App\Services\Project\CreateProjectService;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
@@ -22,9 +23,9 @@ class ProjectController extends ApiController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateProjectRequest $request)
+    public function store(CreateProjectRequest $request, CreateProjectService $createProjectService)
     {
-        $project = Project::create($request->validated());
+        $project = $createProjectService->execute(auth('sanctum')->user(), $request->validated());
 
         return Response::json(new ProjectResource($project), ResponseCode::HTTP_CREATED);
     }

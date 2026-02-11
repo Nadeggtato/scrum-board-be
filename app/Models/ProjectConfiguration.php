@@ -10,7 +10,7 @@ class ProjectConfiguration extends Model
 {
     use HasUuids;
 
-    const DEFAULT_TASK_STATUSES = [
+    public const DEFAULT_TASK_STATUSES = [
         [
             'status' => 'To Do',
             'color' => '#EBD7D3',

@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ProjectMember extends Model
+class ProjectMember extends Pivot
 {
-    use SoftDeletes;
+    use HasUuids, SoftDeletes;
 }
