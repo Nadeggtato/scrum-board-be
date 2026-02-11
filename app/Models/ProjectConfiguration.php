@@ -10,6 +10,22 @@ class ProjectConfiguration extends Model
 {
     use HasUuids;
 
+    const DEFAULT_TASK_STATUSES = [
+        [
+            'status' => 'To Do',
+            'color' => '#EBD7D3',
+        ], [
+            'status' => 'In Progress',
+            'color' => '#FAFFAD',
+        ], [
+            'status' => 'Done',
+            'color' => '#4F734B',
+        ], [
+            'status' => 'Blocked',
+            'color' => '#781717',
+        ],
+    ];
+
     protected $fillable = [
         'type',
         'value',
