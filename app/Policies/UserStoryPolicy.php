@@ -3,11 +3,11 @@
 namespace App\Policies;
 
 use App\Models\Project;
-use App\Models\Sprint;
 use App\Models\User;
+use App\Models\UserStory;
 use App\Support\ProjectMemberChecker;
 
-class SprintPolicy
+class UserStoryPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -20,10 +20,9 @@ class SprintPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Project $project, Sprint $sprint): bool
+    public function view(User $user, UserStory $userStory): bool
     {
-        return $user->can('view-sprints') &&
-            app(ProjectMemberChecker::class)($project, $user);
+        return false;
     }
 
     /**
@@ -31,23 +30,22 @@ class SprintPolicy
      */
     public function create(User $user, Project $project): bool
     {
-        return $user->can('create-sprint') &&
+        return $user->can('create-user-story') &&
             app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Project $project, Sprint $sprint): bool
+    public function update(User $user, UserStory $userStory): bool
     {
-        return $user->can('update-sprint') &&
-            app(ProjectMemberChecker::class)($project, $user);
+        return false;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Sprint $sprint): bool
+    public function delete(User $user, UserStory $userStory): bool
     {
         return false;
     }
@@ -55,7 +53,7 @@ class SprintPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Sprint $sprint): bool
+    public function restore(User $user, UserStory $userStory): bool
     {
         return false;
     }
@@ -63,7 +61,7 @@ class SprintPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Sprint $sprint): bool
+    public function forceDelete(User $user, UserStory $userStory): bool
     {
         return false;
     }

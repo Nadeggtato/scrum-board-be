@@ -12,6 +12,11 @@ class UserStory extends Model
 {
     use HasUuids, SoftDeletes;
 
+    const ALLOWED_INCLUDES = [
+        'project',
+        'sprint',
+    ];
+
     protected $fillable = [
         'description',
         'story_points',

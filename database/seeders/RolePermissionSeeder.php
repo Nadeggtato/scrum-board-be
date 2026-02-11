@@ -37,6 +37,7 @@ class RolePermissionSeeder extends Seeder
         self::PROJECT_PERMISSIONS,
         self::PROJECT_MEMBER_PERMISSIONS,
         self::SPRINT_PERMISSIONS,
+        self::USER_STORY_PERMISSIONS,
     ];
 
     /**
@@ -44,12 +45,13 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $managerPermissions = [self::PROJECT_PERMISSIONS, self::PROJECT_MEMBER_PERMISSIONS, self::SPRINT_PERMISSIONS];
+        $allPermissions = Arr::collapse(self::ALL_PERMISSIONS);
+        $devPermissions = [self::USER_STORY_PERMISSIONS];
 
         RoleModel::truncate();
         Permission::truncate();
 
-        foreach (Arr::collapse(self::ALL_PERMISSIONS) as $permission) {
+        foreach ($allPermissions as $permission) {
             Permission::create(['name' => $permission]);
         }
 
@@ -60,12 +62,21 @@ class RolePermissionSeeder extends Seeder
                 case RoleModel::PROJECT_MANAGER:
                     $permissions = Permission::whereIn(
                         'name',
-                        Arr::collapse($managerPermissions)
+                        $allPermissions
                     )->get();
-                    $createdRole->syncPermissions($permissions);
+
                     break;
                 case RoleModel::DEVELOPER:
+                    $permissions = Permission::whereIn(
+                        'name',
+                        Arr::collapse($devPermissions)
+                    )->get();
+
                     break;
+            }
+
+            if (isset($permissions)) {
+                $createdRole->syncPermissions($permissions);
             }
         }
     }
