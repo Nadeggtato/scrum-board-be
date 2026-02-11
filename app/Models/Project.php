@@ -15,6 +15,7 @@ class Project extends Model
     const ALLOWED_INCLUDES = [
         'creator',
         'members',
+        'sprints',
     ];
 
     protected $fillable = [
