@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Project;
 use App\Models\User;
+use App\Support\ProjectMemberChecker;
 
 class ProjectPolicy
 {
@@ -20,7 +21,8 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        return $user->can('view-project');
+        return $user->can('view-project') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**
@@ -36,29 +38,14 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project): bool
     {
-        return $user->can('update-project');
+        return $user->can('update-project') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Project $project): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Project $project): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Project $project): bool
     {
         return false;
     }

@@ -34,6 +34,7 @@ class ProjectController extends ApiController
      */
     public function show(Project $project)
     {
+        $this->authorize('view', [Project::class, $project]);
         $project = $this->loadIncludes($project, request(), Project::ALLOWED_INCLUDES);
 
         return Response::json(new ProjectResource($project), ResponseCode::HTTP_OK);
