@@ -23,7 +23,8 @@ class SprintPolicy
     public function view(User $user, Project $project, Sprint $sprint): bool
     {
         return $user->can('view-sprints') &&
-            app(ProjectMemberChecker::class)($project, $user);
+            app(ProjectMemberChecker::class)($project, $user) &&
+            $project->id === $sprint->project_id;
     }
 
     /**
@@ -41,29 +42,14 @@ class SprintPolicy
     public function update(User $user, Project $project, Sprint $sprint): bool
     {
         return $user->can('update-sprint') &&
-            app(ProjectMemberChecker::class)($project, $user);
+            app(ProjectMemberChecker::class)($project, $user) &&
+            $project->id === $sprint->project_id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Sprint $sprint): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Sprint $sprint): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Sprint $sprint): bool
     {
         return false;
     }

@@ -35,6 +35,7 @@ class SprintController extends ApiController
      */
     public function show(Project $project, Sprint $sprint)
     {
+        $this->authorize('view', [Sprint::class, $project, $sprint]);
         $sprint = $this->loadIncludes($sprint, request(), Sprint::ALLOWED_INCLUDES);
 
         return Response::json(new SprintResource($sprint), ResponseCode::HTTP_OK);
