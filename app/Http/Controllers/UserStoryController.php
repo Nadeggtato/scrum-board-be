@@ -54,8 +54,12 @@ class UserStoryController extends ApiController
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(UserStory $userStory)
+    public function destroy(Project $project, UserStory $userStory)
     {
-        //
+        $this->authorize('delete', [UserStory::class, $project, $userStory]);
+
+        $userStory->delete();
+
+        return Response::json(new UserStoryResource($userStory), ResponseCode::HTTP_OK);
     }
 }

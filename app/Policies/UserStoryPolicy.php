@@ -40,30 +40,17 @@ class UserStoryPolicy
     public function update(User $user, Project $project, UserStory $userStory): bool
     {
         return $user->can('update-user-story') &&
-            app(ProjectMemberChecker::class)($project, $user);
+            app(ProjectMemberChecker::class)($project, $user) &&
+            $userStory->project_id === $project->id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, UserStory $userStory): bool
+    public function delete(User $user, Project $project, UserStory $userStory): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, UserStory $userStory): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, UserStory $userStory): bool
-    {
-        return false;
+        return $user->can('delete-user-story') &&
+            app(ProjectMemberChecker::class)($project, $user) &&
+            $userStory->project_id === $project->id;
     }
 }
