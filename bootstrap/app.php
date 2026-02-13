@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         ->controller(SprintController::class)
                         ->group(base_path('routes/api/sprints.php'));
 
-                    Route::prefix('projects/{project}/user_stories')
+                    Route::prefix('projects/{project}/user-stories')
                         ->name('user_stories.')
                         ->controller(UserStoryController::class)
                         ->group(base_path('routes/api/user_stories.php'));

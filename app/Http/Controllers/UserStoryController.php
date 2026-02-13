@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BulkAddUserStoriesRequest;
 use App\Http\Requests\CreateUserStoryRequest;
 use App\Http\Requests\UpdateUserStoryRequest;
 use App\Http\Resources\UserStoryResource;
 use App\Models\Project;
 use App\Models\UserStory;
+use App\Services\UserStory\BulkAddUserStoriesService;
+use Arr;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
@@ -28,6 +31,21 @@ class UserStoryController extends ApiController
         $userStory = UserStory::create([...$request->validated(), 'project_id' => $project->id]);
 
         return Response::json(new UserStoryResource($userStory), ResponseCode::HTTP_CREATED);
+    }
+
+    public function bulkAdd(
+        BulkAddUserStoriesRequest $request,
+        Project $project,
+        BulkAddUserStoriesService $bulkAddUserStoriesService)
+    {
+        $result = $bulkAddUserStoriesService->execute($project, $request->validated());
+        $areAllSaved = Arr::get($result, 'requested_count') === Arr::get($result, 'saved');
+        $message = $areAllSaved ? 'User stories successfully added.' : 'Some user stories could not be saved.';
+
+        return Response::json([
+            'message' => $message,
+            'result' => $result,
+        ], $areAllSaved ? ResponseCode::HTTP_CREATED : ResponseCode::HTTP_MULTI_STATUS);
     }
 
     /**
