@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Sprint;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class BulkAddSprintsService
@@ -50,17 +51,21 @@ class BulkAddSprintsService
 
     public function execute(array $data, Project $project)
     {
-        $rows = $this->buildRows($data, $project);
-        $rowCount = count($rows);
+        return DB::transaction(function () use ($data, $project) {
+            $rows = $this->buildRows($data, $project);
+            $rowCount = count($rows);
+            $totalInserted = 0;
 
-        foreach (array_chunk($rows, length: 1000) as $chunk) {
-            $totalInserted = Sprint::insertOrIgnore($chunk);
-        }
+            foreach (array_chunk($rows, length: 1000) as $chunk) {
+                $totalInserted = Sprint::insertOrIgnore($chunk);
+            }
 
-        return [
-            'requested' => $rowCount,
-            'inserted' => $totalInserted,
-            'skipped' => $rowCount - $totalInserted,
-        ];
+            return [
+                'requested' => $rowCount,
+                'inserted' => $totalInserted,
+                'skipped' => $rowCount - $totalInserted,
+            ];
+        });
+
     }
 }
