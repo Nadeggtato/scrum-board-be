@@ -11,9 +11,18 @@ class Sprint extends Model
 {
     use HasUuids;
 
-    const ALLOWED_INCLUDES = [
+    public const ALLOWED_INCLUDES = [
         'project',
         'userStories',
+    ];
+
+    public const PATTERN_INCREMENTAL = 0;
+
+    public const PATTERN_WEEK_NUMBER = 1;
+
+    public const NAMING_PATTERNS = [
+        self::PATTERN_INCREMENTAL,
+        self::PATTERN_WEEK_NUMBER,
     ];
 
     protected $fillable = [
