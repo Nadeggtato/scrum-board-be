@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SprintController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserStoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -31,6 +32,11 @@ return Application::configure(basePath: dirname(__DIR__))
                         ->name('user_stories.')
                         ->controller(UserStoryController::class)
                         ->group(base_path('routes/api/user_stories.php'));
+
+                    Route::prefix('projects/{project}/tasks')
+                        ->name('tasks.')
+                        ->controller(TaskController::class)
+                        ->group(base_path('routes/api/tasks.php'));
                 });
 
         },

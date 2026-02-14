@@ -26,6 +26,13 @@ class RolePermissionSeeder extends Seeder
         'update-sprint',
     ];
 
+    private const TASK_PERMISSIONS = [
+        'view-tasks',
+        'create-tasks',
+        'update-tasks',
+        'delete-tasks',
+    ];
+
     private const USER_STORY_PERMISSIONS = [
         'view-user-stories',
         'create-user-story',
@@ -37,6 +44,7 @@ class RolePermissionSeeder extends Seeder
         self::PROJECT_PERMISSIONS,
         self::PROJECT_MEMBER_PERMISSIONS,
         self::SPRINT_PERMISSIONS,
+        self::TASK_PERMISSIONS,
         self::USER_STORY_PERMISSIONS,
     ];
 
@@ -46,7 +54,7 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         $allPermissions = Arr::collapse(self::ALL_PERMISSIONS);
-        $devPermissions = [self::USER_STORY_PERMISSIONS];
+        $devPermissions = [self::TASK_PERMISSIONS, self::USER_STORY_PERMISSIONS];
 
         RoleModel::truncate();
         Permission::truncate();
