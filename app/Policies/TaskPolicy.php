@@ -46,9 +46,10 @@ class TaskPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Task $task): bool
+    public function delete(User $user, Project $project): bool
     {
-        return false;
+        return $user->can('delete-tasks') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**

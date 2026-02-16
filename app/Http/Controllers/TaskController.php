@@ -63,8 +63,12 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(Project $project, Task $task)
     {
-        //
+        $this->authorize('delete', [Task::class, $project]);
+
+        $task->delete();
+
+        return Response::json(new TaskResource($task), ResponseCode::HTTP_OK);
     }
 }
