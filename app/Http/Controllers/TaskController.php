@@ -11,7 +11,7 @@ use App\Models\Task;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
-class TaskController extends Controller
+class TaskController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -45,9 +45,12 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show(Project $project, Task $task)
     {
-        //
+        $this->authorize('view', [Task::class, $project]);
+        $task = $this->loadIncludes($task, request(), Task::ALLOWED_INCLUDES);
+
+        return Response::json(new TaskResource($task), ResponseCode::HTTP_OK);
     }
 
     /**

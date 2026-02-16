@@ -10,19 +10,12 @@ use App\Support\ProjectMemberChecker;
 class TaskPolicy
 {
     /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
-        return false;
-    }
-
-    /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Task $task): bool
+    public function view(User $user, Project $project): bool
     {
-        return false;
+        return $user->can('view-tasks') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**

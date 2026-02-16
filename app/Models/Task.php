@@ -11,6 +11,11 @@ class Task extends Model
 {
     use HasUuids, SoftDeletes;
 
+    public const ALLOWED_INCLUDES = [
+        'assignee',
+        'userStory',
+    ];
+
     protected $fillable = [
         'title',
         'description',
