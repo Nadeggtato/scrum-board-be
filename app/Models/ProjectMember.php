@@ -9,4 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProjectMember extends Pivot
 {
     use HasUuids, SoftDeletes;
+
+    protected $table = 'project_members';
 }
