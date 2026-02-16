@@ -37,9 +37,10 @@ class TaskPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Task $task): bool
+    public function update(User $user, Project $project): bool
     {
-        return false;
+        return $user->can('update-tasks') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 
     /**

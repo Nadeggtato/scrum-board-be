@@ -19,7 +19,7 @@ class CreateProjectService
             ]);
 
             ProjectConfiguration::create([
-                'type' => 'task_statuses',
+                'type' => ProjectConfiguration::TYPE_TASK_STATUSES,
                 'value' => json_encode(ProjectConfiguration::DEFAULT_TASK_STATUSES),
                 'project_id' => $project->id,
             ]);
