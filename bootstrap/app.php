@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserStoryController;
@@ -23,20 +24,28 @@ return Application::configure(basePath: dirname(__DIR__))
                         ->controller(ProjectController::class)
                         ->group(base_path('routes/api/projects.php'));
 
-                    Route::prefix('projects/{project}/sprints')
-                        ->name('sprints.')
-                        ->controller(SprintController::class)
-                        ->group(base_path('routes/api/sprints.php'));
+                    Route::prefix('projects/{project}')
+                        ->group(function () {
+                            Route::prefix('sprints')
+                                ->name('sprints.')
+                                ->controller(SprintController::class)
+                                ->group(base_path('routes/api/sprints.php'));
 
-                    Route::prefix('projects/{project}/user-stories')
-                        ->name('user_stories.')
-                        ->controller(UserStoryController::class)
-                        ->group(base_path('routes/api/user_stories.php'));
+                            Route::prefix('user-stories')
+                                ->name('user_stories.')
+                                ->controller(UserStoryController::class)
+                                ->group(base_path('routes/api/user_stories.php'));
 
-                    Route::prefix('projects/{project}/tasks')
-                        ->name('tasks.')
-                        ->controller(TaskController::class)
-                        ->group(base_path('routes/api/tasks.php'));
+                            Route::prefix('tasks')
+                                ->name('tasks.')
+                                ->controller(TaskController::class)
+                                ->group(base_path('routes/api/tasks.php'));
+
+                            Route::prefix('members')
+                                ->name('members.')
+                                ->controller(ProjectMemberController::class)
+                                ->group(base_path('routes/api/project_members.php'));
+                        });
                 });
 
         },

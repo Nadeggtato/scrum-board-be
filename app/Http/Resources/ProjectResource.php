@@ -19,6 +19,7 @@ class ProjectResource extends JsonResource
             'name' => $this->name,
             'created_by' => new UserResource($this->whenLoaded('creator')),
             'sprints' => SprintResource::collection($this->whenLoaded('sprints')),
+            'members' => UserResource::collection($this->whenLoaded('members')),
         ];
     }
 }
