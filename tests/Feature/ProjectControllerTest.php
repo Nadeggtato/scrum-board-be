@@ -19,6 +19,8 @@ class ProjectControllerTest extends TestCase
 
     private User $developer;
 
+    private User $nonMember;
+
     private User $projectManager;
 
     private Project $project;
@@ -36,7 +38,10 @@ class ProjectControllerTest extends TestCase
         $this->projectManager->assignRole(Role::PROJECT_MANAGER);
 
         $this->project = Project::factory()->create(['creator_id' => $this->projectManager->id]);
-        $this->project->members()->attach($this->projectManager->id);
+        $this->project->members()->sync([$this->projectManager->id, $this->developer->id]);
+
+        $this->nonMember = User::factory()->create();
+        $this->nonMember->assignRole(Role::PROJECT_MANAGER);
     }
 
     public function test_developers_cant_create_project(): void
@@ -94,9 +99,7 @@ class ProjectControllerTest extends TestCase
 
     public function test_non_member_cant_update_project(): void
     {
-        $nonMember = User::factory()->create();
-        $this->projectManager->assignRole(Role::PROJECT_MANAGER);
-        Sanctum::actingAs($nonMember);
+        Sanctum::actingAs($this->nonMember);
 
         $this->patchJson("api/projects/{$this->project->id}", [
             'name' => fake()->word(),
@@ -124,6 +127,33 @@ class ProjectControllerTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('name', $newName);
 
-        $this->assertDatabaseHas(Project::class, ['name' => $newName, 'is_active' => false]);
+        $this->assertDatabaseHas(Project::class, [
+            'id' => $response->json('id'),
+            'name' => $newName,
+            'is_active' => false,
+        ]);
+    }
+
+    public function test_non_member_cant_view_project(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+
+        $this->getJson("api/projects/{$this->project->id}")
+            ->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_view_project_by_id(): void
+    {
+        Sanctum::actingAs($this->projectManager);
+
+        $this->getJson("api/projects/{$this->project->id}?include=creator,sprints,members")
+            ->assertOk()
+            ->assertJsonStructure([
+                'id',
+                'name',
+                'created_by',
+                'sprints',
+                'members',
+            ]);
     }
 }
