@@ -2,48 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\Project;
 use App\Models\ProjectMember;
-use App\Models\Role;
 use App\Models\User;
-use Database\Seeders\RolePermissionSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\TestCase;
 
-class ProjectMemberControllerTest extends TestCase
+class ProjectMemberControllerTest extends BaseProjectTest
 {
-    use RefreshDatabase;
-
-    private User $developer;
-
-    private User $nonMember;
-
-    private User $projectManager;
-
-    private Project $project;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $this->seed(RolePermissionSeeder::class);
-
-        $this->developer = User::factory()->create();
-        $this->developer->assignRole(Role::DEVELOPER);
-
-        $this->projectManager = User::factory()->create();
-        $this->projectManager->assignRole(Role::PROJECT_MANAGER);
-
-        $this->project = Project::factory()->create(['creator_id' => $this->projectManager->id]);
-        $this->project->members()->sync([$this->projectManager->id, $this->developer->id]);
-
-        $this->nonMember = User::factory()->create();
-        $this->nonMember->assignRole(Role::PROJECT_MANAGER);
-    }
-
     public function test_non_member_cant_add_member_to_project(): void
     {
         Sanctum::actingAs($this->nonMember);
