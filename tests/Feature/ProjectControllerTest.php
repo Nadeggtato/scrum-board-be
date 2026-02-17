@@ -48,7 +48,7 @@ class ProjectControllerTest extends TestCase
     {
         Sanctum::actingAs($this->developer);
 
-        $this->postJson('api/projects', [
+        $this->postJson(route('projects.store'), [
             'name' => fake()->word(),
         ])->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -60,7 +60,7 @@ class ProjectControllerTest extends TestCase
             'name' => str_repeat('a', 256),
         ];
 
-        $this->postJson('api/projects', $data)
+        $this->postJson(route('projects.store'), $data)
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['name']);
     }
@@ -72,7 +72,7 @@ class ProjectControllerTest extends TestCase
             'name' => fake()->word(),
         ];
 
-        $response = $this->postJson('api/projects', $data)
+        $response = $this->postJson(route('projects.store'), $data)
             ->assertCreated()
             ->assertJsonPath('name', $data['name']);
 
@@ -91,28 +91,30 @@ class ProjectControllerTest extends TestCase
     {
         Sanctum::actingAs($this->developer);
 
-        $this->patchJson("api/projects/{$this->project->id}", [
-            'name' => fake()->word(),
-        ])
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->patchJson(
+            route('projects.update', ['project' => $this->project]),
+            ['name' => fake()->word()]
+        )->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function test_non_member_cant_update_project(): void
     {
         Sanctum::actingAs($this->nonMember);
 
-        $this->patchJson("api/projects/{$this->project->id}", [
-            'name' => fake()->word(),
-        ])
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->patchJson(
+            route('projects.update', ['project' => $this->project]),
+            ['name' => fake()->word()]
+        )->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function test_invalid_payload_on_update_project_endpoint(): void
     {
         Sanctum::actingAs($this->projectManager);
 
-        $this->patchJson("api/projects/{$this->project->id}", [])
-            ->assertUnprocessable()
+        $this->patchJson(
+            route('projects.update', ['project' => $this->project]),
+            []
+        )->assertUnprocessable()
             ->assertJsonValidationErrors(['name', 'is_active']);
     }
 
@@ -121,10 +123,12 @@ class ProjectControllerTest extends TestCase
         Sanctum::actingAs($this->projectManager);
         $newName = fake()->word();
 
-        $response = $this->patchJson("api/projects/{$this->project->id}", [
-            'name' => $newName,
-            'is_active' => false,
-        ])->assertOk()
+        $response = $this->patchJson(
+            route('projects.update', ['project' => $this->project]),
+            [
+                'name' => $newName,
+                'is_active' => false,
+            ])->assertOk()
             ->assertJsonPath('name', $newName);
 
         $this->assertDatabaseHas(Project::class, [
@@ -138,7 +142,7 @@ class ProjectControllerTest extends TestCase
     {
         Sanctum::actingAs($this->nonMember);
 
-        $this->getJson("api/projects/{$this->project->id}")
+        $this->getJson(route('projects.show', ['project' => $this->project]))
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
@@ -146,8 +150,11 @@ class ProjectControllerTest extends TestCase
     {
         Sanctum::actingAs($this->projectManager);
 
-        $this->getJson("api/projects/{$this->project->id}?include=creator,sprints,members")
-            ->assertOk()
+        $this->getJson(
+            route('projects.show', [
+                'project' => $this->project,
+                'include' => 'creator,sprints,members',
+            ]))->assertOk()
             ->assertJsonStructure([
                 'id',
                 'name',
