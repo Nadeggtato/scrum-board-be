@@ -30,7 +30,7 @@ class SprintController extends ApiController
     {
         $sprint = Sprint::create([...$request->validated(), 'project_id' => $project->id]);
 
-        return Response::json(new SprintResource($sprint), ResponseCode::HTTP_OK);
+        return Response::json(new SprintResource($sprint), ResponseCode::HTTP_CREATED);
     }
 
     public function bulkAdd(
