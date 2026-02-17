@@ -125,4 +125,45 @@ class ProjectMemberControllerTest extends TestCase
             ]);
         }
     }
+
+    public function test_developer_cant_remove_project_member(): void
+    {
+        Sanctum::actingAs($this->developer);
+
+        $this->deleteJson(route(
+            'members.delete',
+            ['project' => $this->project, 'user' => $this->developer])
+        )->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_non_member_cant_remove_project_member(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+
+        $this->deleteJson(route(
+            'members.delete',
+            ['project' => $this->project, 'user' => $this->developer])
+        )->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_remove_member_to_project_endpoint(): void
+    {
+        Sanctum::actingAs($this->projectManager);
+
+        $this->deleteJson(route(
+            'members.delete',
+            ['project' => $this->project, 'user' => $this->developer])
+        )->assertOk();
+
+        $this->assertDatabaseCount(ProjectMember::class, 2);
+        $this->assertDatabaseMissing(
+            ProjectMember::class,
+            ['user_id' => $this->developer->id, 'deleted_at' => null]
+        );
+
+        $this->deleteJson(route(
+            'members.delete',
+            ['project' => $this->project, 'user' => $this->developer])
+        )->assertUnprocessable();
+    }
 }

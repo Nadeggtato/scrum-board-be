@@ -3,28 +3,11 @@
 namespace App\Policies;
 
 use App\Models\Project;
-use App\Models\ProjectMember;
 use App\Models\User;
 use App\Support\ProjectMemberChecker;
 
 class ProjectMemberPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, ProjectMember $projectMember): bool
-    {
-        return false;
-    }
-
     /**
      * Determine whether the user can create models.
      */
@@ -35,34 +18,11 @@ class ProjectMemberPolicy
     }
 
     /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, ProjectMember $projectMember): bool
-    {
-        return false;
-    }
-
-    /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, ProjectMember $projectMember): bool
+    public function delete(User $user, Project $project): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, ProjectMember $projectMember): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, ProjectMember $projectMember): bool
-    {
-        return false;
+        return $user->can('remove-project-member') &&
+            app(ProjectMemberChecker::class)($project, $user);
     }
 }

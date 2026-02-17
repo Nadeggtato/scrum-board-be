@@ -31,6 +31,7 @@ class ProjectMemberController extends Controller
      */
     public function destroy(Project $project, User $user)
     {
+        $this->authorize('delete', [ProjectMember::class, $project]);
         $member = ProjectMember::firstWhere(['project_id' => $project->id, 'user_id' => $user->id]);
 
         if (empty($member)) {
