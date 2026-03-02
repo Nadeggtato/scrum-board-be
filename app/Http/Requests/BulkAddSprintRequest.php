@@ -25,7 +25,7 @@ class BulkAddSprintRequest extends FormRequest
     {
         return [
             'from' => ['required', 'date_format:Y-m-d'],
-            'to' => ['required', 'date_format:Y-m-d'],
+            'to' => ['required', 'date_format:Y-m-d', 'after:from'],
             'name_pattern' => ['required', 'integer', Rule::in(Sprint::NAMING_PATTERNS)],
             'increment_start' => ['required_if:name_pattern,'.Sprint::PATTERN_INCREMENTAL, 'integer'],
             'sprint_duration' => ['required', 'integer', 'min:1', 'max:4'],

@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
-class BaseProjectTest extends TestCase
+abstract class BaseProjectTest extends TestCase
 {
     use RefreshDatabase;
 
