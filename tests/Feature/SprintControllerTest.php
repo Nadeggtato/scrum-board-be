@@ -33,12 +33,11 @@ class SprintControllerTest extends BaseProjectTest
     {
         Sanctum::actingAs($this->projectManager);
 
-        $this->postJson(route('sprints.store', [
-            'project' => $this->project,
+        $this->postJson(route('sprints.store', ['project' => $this->project]), [
             'name' => str_repeat('a', 260),
             'start' => '2026-05-01',
             'end' => '2026-01-01',
-        ]))->assertUnprocessable()
+        ])->assertUnprocessable()
             ->assertJsonValidationErrors(['name', 'end']);
     }
 
@@ -51,7 +50,7 @@ class SprintControllerTest extends BaseProjectTest
             'end' => '2026-04-29',
         ];
 
-        $this->postJson(route('sprints.store', [...$data, 'project' => $this->project]))
+        $this->postJson(route('sprints.store', ['project' => $this->project]), $data)
             ->assertCreated()
             ->assertJsonStructure([
                 'id',
@@ -66,11 +65,10 @@ class SprintControllerTest extends BaseProjectTest
     {
         Sanctum::actingAs($this->developer);
 
-        $this->postJson(route('sprints.bulk-add', [
-            'project' => $this->project,
+        $this->postJson(route('sprints.bulk-add', ['project' => $this->project]), [
             'from' => '2026-01-01',
             'to' => '2026-01-25',
-        ]))->assertStatus(Response::HTTP_FORBIDDEN);
+        ])->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function test_non_members_cant_bulk_add_sprints(): void
@@ -211,8 +209,7 @@ class SprintControllerTest extends BaseProjectTest
 
         $key = "bulk-add-sprints:{$this->project->id}";
         $lock = Cache::lock($key, 10);
-        // dump($lock->get());
-        //
+
         $this->assertTrue($lock->get());
 
         try {
@@ -232,5 +229,34 @@ class SprintControllerTest extends BaseProjectTest
         } finally {
             optional($lock)->release();
         }
+    }
+
+    public function test_non_members_cannot_view_sprint(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+
+        $this->getJson(route('sprints.show', [
+            'sprint' => Sprint::factory()->create(['project_id' => $this->project->id]),
+            'project' => $this->project,
+        ]))->assertForbidden();
+    }
+
+    public function test_members_can_view_sprint(): void
+    {
+        Sanctum::actingAs($this->projectManager);
+
+        $this->getJson(route('sprints.show', [
+            'sprint' => Sprint::factory()->create(['project_id' => $this->project->id]),
+            'project' => $this->project,
+            'include' => 'project,userStories,dummy',
+        ]))->assertOk()
+            ->assertJsonStructure([
+                'id',
+                'name',
+                'start',
+                'end',
+                'project',
+                'user_stories',
+            ]);
     }
 }
