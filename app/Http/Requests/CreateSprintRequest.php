@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\Sprint;
+use App\Rules\SprintLengthRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 
 class CreateSprintRequest extends FormRequest
 {
@@ -25,7 +27,12 @@ class CreateSprintRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'start' => ['required', 'date_format:Y-m-d'],
-            'end' => ['required', 'date_format:Y-m-d', 'after:start'],
+            'end' => [
+                'required',
+                'date_format:Y-m-d',
+                'after:start',
+                new SprintLengthRule(Carbon::parse($this->input('start'))),
+            ],
         ];
     }
 }
