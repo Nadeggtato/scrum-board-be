@@ -10,23 +10,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SprintControllerTest extends BaseProjectTest
 {
-    public function test_developers_cant_create_sprint(): void
+    public function test_developers_and_non_members_cant_create_sprint(): void
     {
-        Sanctum::actingAs($this->developer);
+        foreach ([$this->developer, $this->nonMember] as $person) {
+            Sanctum::actingAs($person);
 
-        $this->postJson(route('sprints.store', [
-            'project' => $this->project,
-        ]))->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    public function test_non_members_cant_create_sprint(): void
-    {
-        Sanctum::actingAs($this->nonMember);
-
-        $this->postJson(route(
-            'sprints.store',
-            ['project' => $this->project]
-        ))->assertStatus(Response::HTTP_FORBIDDEN);
+            $this->postJson(route('sprints.store', [
+                'project' => $this->project,
+            ]))->assertStatus(Response::HTTP_FORBIDDEN);
+        }
     }
 
     public function test_invalid_payload_on_create_sprint_endpoint_returns_422(): void
@@ -61,25 +53,17 @@ class SprintControllerTest extends BaseProjectTest
         $this->assertDatabaseHas(Sprint::class, [...$data, 'project_id' => $this->project->id]);
     }
 
-    public function test_developers_cant_bulk_add_sprints(): void
+    public function test_developers_and_non_memberscant_bulk_add_sprints(): void
     {
-        Sanctum::actingAs($this->developer);
+        foreach ([$this->developer, $this->nonMember] as $person) {
+            Sanctum::actingAs($person);
 
-        $this->postJson(route('sprints.bulk-add', ['project' => $this->project]), [
-            'from' => '2026-01-01',
-            'to' => '2026-01-25',
-        ])->assertStatus(Response::HTTP_FORBIDDEN);
-    }
+            $this->postJson(route('sprints.bulk-add', ['project' => $this->project]), [
+                'from' => '2026-01-01',
+                'to' => '2026-01-25',
+            ])->assertStatus(Response::HTTP_FORBIDDEN);
 
-    public function test_non_members_cant_bulk_add_sprints(): void
-    {
-        Sanctum::actingAs($this->nonMember);
-
-        $this->postJson(route('sprints.bulk-add', [
-            'project' => $this->project,
-            'from' => '2026-01-01',
-            'to' => '2026-01-25',
-        ]))->assertStatus(Response::HTTP_FORBIDDEN);
+        }
     }
 
     public function test_invalid_payload_on_bulk_add_sprints_returns_422(): void
@@ -258,5 +242,43 @@ class SprintControllerTest extends BaseProjectTest
                 'project',
                 'user_stories',
             ]);
+    }
+
+    public function test_non_members_cant_update_sprint(): void
+    {
+        foreach ([$this->developer, $this->nonMember] as $person) {
+            Sanctum::actingAs($person);
+            $sprint = Sprint::factory()->create(['project_id' => $this->project->id]);
+            $data = [
+                'name' => 'New sprint name',
+                'start' => '2026-09-10',
+                'end' => '2026-10-03',
+            ];
+
+            $this->patchJson(route('sprints.update', [
+                'sprint' => $sprint,
+                'project' => $this->project,
+            ]), $data)
+                ->assertForbidden();
+        }
+    }
+
+    public function test_project_manager_can_update_sprint(): void
+    {
+        Sanctum::actingAs($this->projectManager);
+        $sprint = Sprint::factory()->create(['project_id' => $this->project->id]);
+        $data = [
+            'name' => 'New sprint name',
+            'start' => '2026-09-10',
+            'end' => '2026-10-03',
+        ];
+
+        $this->patchJson(route('sprints.update', [
+            'sprint' => $sprint,
+            'project' => $this->project,
+        ]), $data)
+            ->assertOk();
+
+        $this->assertDatabaseHas(Sprint::class, $data);
     }
 }

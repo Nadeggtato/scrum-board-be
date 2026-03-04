@@ -5,32 +5,21 @@ namespace Tests\Feature;
 use App\Models\ProjectMember;
 use App\Models\User;
 use Laravel\Sanctum\Sanctum;
-use Symfony\Component\HttpFoundation\Response;
 
 class ProjectMemberControllerTest extends BaseProjectTest
 {
     public function test_non_member_cant_add_member_to_project(): void
     {
-        Sanctum::actingAs($this->nonMember);
+        foreach ([$this->developer, $this->nonMember] as $person) {
+            Sanctum::actingAs($person);
 
-        $this->postJson(
-            route(
-                'members.store',
-                ['project' => $this->project, 'user_ids' => [$this->developer->id]],
-            )
-        )->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    public function test_developer_cant_add_member_to_project(): void
-    {
-        Sanctum::actingAs($this->developer);
-
-        $this->postJson(
-            route(
-                'members.store',
-                ['project' => $this->project, 'user_ids' => [$this->developer->id]],
-            )
-        )->assertStatus(Response::HTTP_FORBIDDEN);
+            $this->postJson(
+                route(
+                    'members.store',
+                    ['project' => $this->project, 'user_ids' => [$this->developer->id]],
+                )
+            )->assertForbidden();
+        }
     }
 
     public function test_invalid_payload_on_add_existing_member_endpoint_should_return_422(): void
@@ -93,22 +82,14 @@ class ProjectMemberControllerTest extends BaseProjectTest
 
     public function test_developer_cant_remove_project_member(): void
     {
-        Sanctum::actingAs($this->developer);
+        foreach ([$this->developer, $this->nonMember] as $person) {
+            Sanctum::actingAs($person);
 
-        $this->deleteJson(route(
-            'members.delete',
-            ['project' => $this->project, 'user' => $this->developer])
-        )->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    public function test_non_member_cant_remove_project_member(): void
-    {
-        Sanctum::actingAs($this->nonMember);
-
-        $this->deleteJson(route(
-            'members.delete',
-            ['project' => $this->project, 'user' => $this->developer])
-        )->assertStatus(Response::HTTP_FORBIDDEN);
+            $this->deleteJson(route(
+                'members.delete',
+                ['project' => $this->project, 'user' => $this->developer])
+            )->assertForbidden();
+        }
     }
 
     public function test_remove_member_to_project_endpoint(): void
