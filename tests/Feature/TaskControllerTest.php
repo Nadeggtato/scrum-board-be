@@ -9,6 +9,18 @@ use Laravel\Sanctum\Sanctum;
 
 class TaskControllerTest extends BaseProjectTest
 {
+    private $task;
+
+    private $userStory;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->userStory = UserStory::factory()->create(['project_id' => $this->project->id]);
+        $this->task = Task::factory()->create(['user_story_id' => $this->userStory->id]);
+    }
+
     public function test_non_member_cant_create_task(): void
     {
         Sanctum::actingAs($this->nonMember);
@@ -16,7 +28,7 @@ class TaskControllerTest extends BaseProjectTest
         $this->postJson(route('tasks.store', ['project' => $this->project]), [
             'description' => fake()->text(),
             'user_id' => $this->developer->id,
-            'user_story_id' => UserStory::factory()->create(['project_id' => $this->project->id])->id,
+            'user_story_id' => $this->userStory->id,
         ])->assertForbidden();
     }
 
@@ -39,20 +51,56 @@ class TaskControllerTest extends BaseProjectTest
 
     public function test_developer_and_project_manager_can_create_task(): void
     {
-        Sanctum::actingAs($this->projectManager);
-        $data = [
-            'title' => fake()->title(),
-            'description' => fake()->text(),
-            'user_id' => $this->developer->id,
-            'user_story_id' => UserStory::factory()->create(['project_id' => $this->project->id])->id,
-        ];
+        $taskCount = 1;
 
-        $this->postJson(
-            route('tasks.store', ['project' => $this->project]),
-            $data
-        )->assertCreated();
+        foreach ([$this->projectManager, $this->developer] as $person) {
+            Sanctum::actingAs($person);
+            $data = [
+                'title' => fake()->title(),
+                'description' => fake()->text(),
+                'user_id' => $this->developer->id,
+                'user_story_id' => $this->userStory->id,
+            ];
 
-        $this->assertDatabaseCount(Task::class, 1);
-        $this->assertDatabaseHas(Task::class, $data);
+            $this->postJson(
+                route('tasks.store', ['project' => $this->project]),
+                $data
+            )->assertCreated();
+
+            $taskCount++;
+            $this->assertDatabaseCount(Task::class, $taskCount);
+            $this->assertDatabaseHas(Task::class, $data);
+        }
+    }
+
+    public function test_non_member_cant_view_task(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+
+        $this->getJson(route('tasks.show', [
+            'project' => $this->project,
+            'task' => $this->task,
+        ]))
+            ->assertForbidden();
+    }
+
+    public function test_members_can_view_task(): void
+    {
+        foreach ([$this->projectManager, $this->developer] as $person) {
+            Sanctum::actingAs($person);
+
+            $this->getJson(route('tasks.show', [
+                'project' => $this->project,
+                'task' => $this->task,
+                'include' => 'assignee,userStory',
+            ]))->assertOk()
+                ->assertJsonStructure([
+                    'id',
+                    'title',
+                    'description',
+                    'assignee',
+                    'user_story',
+                ]);
+        }
     }
 }
