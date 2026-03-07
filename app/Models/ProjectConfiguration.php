@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProjectConfiguration extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     public const TYPE_TASK_STATUSES = 'task_statuses';
 
     public const STATUS_TO_DO = 'To Do';
+
+    public const STATUS_IN_PROGRESS = 'In Progress';
 
     public const DEFAULT_TASK_STATUSES = [
         [

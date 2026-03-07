@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Project;
+use App\Models\ProjectConfiguration;
 use App\Models\Task;
 use App\Models\UserStory;
 use Laravel\Sanctum\Sanctum;
@@ -101,6 +102,80 @@ class TaskControllerTest extends BaseProjectTest
                     'assignee',
                     'user_story',
                 ]);
+        }
+    }
+
+    public function test_non_members_cant_update_task(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+        $data = [
+            'title' => 'Updated title',
+            'user_id' => $this->developer,
+        ];
+
+        $this->patchJson(route('tasks.update', [
+            'project' => $this->project,
+            'task' => $this->task,
+        ]), $data)->assertForbidden();
+        $this->assertDatabaseMissing(Task::class, [
+            ...$data,
+            'id' => $this->task->id,
+        ]);
+    }
+
+    public function test_invalid_payload_returns_422_on_update_task(): void
+    {
+        Sanctum::actingAs($this->projectManager);
+        $anotherProject = Project::factory()->create(['creator_id' => $this->projectManager]);
+        ProjectConfiguration::factory()->create(['project_id' => $anotherProject->id]);
+        ProjectConfiguration::factory()->create(['project_id' => $this->project->id]);
+        $userStory = UserStory::factory()->create(['project_id' => $anotherProject->id]);
+
+        $data = [
+            'title' => str_repeat('a', 500),
+            'description' => fake()->text(),
+            'status' => 'Invalid Status',
+            'user_id' => $this->nonMember,
+            'user_story_id' => $anotherProject,
+        ];
+
+        $this->patchJson(route('tasks.update', [
+            'project' => $this->project,
+            'task' => $this->task,
+        ]), $data)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'title',
+                'status',
+                'user_id',
+                'user_story_id',
+            ]);
+    }
+
+    public function test_members_can_update_task(): void
+    {
+        ProjectConfiguration::factory()->create(['project_id' => $this->project->id]);
+
+        foreach ([$this->projectManager, $this->developer] as $key => $person) {
+            Sanctum::actingAs($person);
+            $userStory = UserStory::factory()->create(['project_id' => $this->project->id]);
+
+            $data = [
+                'title' => 'Updated title'.$key,
+                'description' => fake()->text(),
+                'status' => ProjectConfiguration::STATUS_IN_PROGRESS,
+                'user_id' => $person->id,
+                'user_story_id' => $userStory->id,
+            ];
+
+            $this->patchJson(route('tasks.update', [
+                'project' => $this->project,
+                'task' => $this->task,
+            ]), $data)
+                ->assertOk();
+
+            $this->assertDatabaseCount(Task::class, 1);
+            $this->assertDatabaseHas(Task::class, [...$data, 'id' => $this->task->id]);
         }
     }
 }

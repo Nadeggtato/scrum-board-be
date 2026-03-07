@@ -34,7 +34,7 @@ class UpdateTaskRequest extends FormRequest
             'user_id' => [
                 'nullable',
                 'uuid',
-                'exists:users',
+                'exists:users,id',
                 Rule::exists('project_members', 'user_id')
                     ->where('project_id', $projectId)
                     ->whereNull('deleted_at'),
