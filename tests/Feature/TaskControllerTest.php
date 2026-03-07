@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Project;
 use App\Models\ProjectConfiguration;
+use App\Models\ProjectMember;
 use App\Models\Task;
 use App\Models\UserStory;
 use Laravel\Sanctum\Sanctum;
@@ -177,5 +178,37 @@ class TaskControllerTest extends BaseProjectTest
             $this->assertDatabaseCount(Task::class, 1);
             $this->assertDatabaseHas(Task::class, [...$data, 'id' => $this->task->id]);
         }
+    }
+
+    public function test_non_members_cant_delete_task(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+
+        $this->deleteJson(route('tasks.delete', [
+            'project' => $this->project,
+            'task' => $this->task,
+        ]))->assertForbidden();
+
+        $taskB = Task::factory()->create(['user_story_id' => $this->userStory->id]);
+        ProjectMember::firstWhere([
+            'user_id' => $this->developer->id,
+            'project_id' => $this->project->id,
+        ])->delete();
+        Sanctum::actingAs($this->developer);
+
+        $this->deleteJson(route('tasks.delete', [
+            'project' => $this->project,
+            'task' => $taskB,
+        ]))->assertForbidden();
+    }
+
+    public function test_delete_task_endpoint(): void
+    {
+        Sanctum::actingAs($this->developer);
+
+        $this->deleteJson(route('tasks.delete', [
+            'project' => $this->project,
+            'task' => $this->task,
+        ]))->assertOk();
     }
 }
