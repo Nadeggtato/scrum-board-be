@@ -1,0 +1,62 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Project;
+use App\Models\Sprint;
+use App\Models\UserStory;
+use Laravel\Sanctum\Sanctum;
+
+class UserStoryControllerTest extends BaseProjectTest
+{
+    public function test_non_members_cant_create_user_story(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+
+        $this->postJson(route('user_stories.store', [
+            'project' => $this->project,
+        ]), [
+            'description' => fake()->text(),
+            'story_points' => 1,
+            'sprint_id' => null,
+        ])->assertForbidden();
+    }
+
+    public function test_invalid_payload_returns_422_on_create_user_story_endpoint(): void
+    {
+        Sanctum::actingAs($this->developer);
+
+        $this->postJson(route('user_stories.store', ['project' => $this->project]), [
+            'description' => str_repeat('a', 1001),
+            'story_points' => 'high',
+            'sprint_id' => Sprint::factory()->create([
+                'project_id' => Project::factory()->create(['creator_id' => $this->projectManager->id])->id,
+            ]),
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'description',
+                'story_points',
+                'sprint_id',
+            ]);
+    }
+
+    public function test_members_can_create_user_story(): void
+    {
+        foreach ([$this->developer, $this->projectManager] as $key => $person) {
+            Sanctum::actingAs($person);
+            $data = [
+                'description' => fake()->text(),
+                'story_points' => 1,
+                'sprint_id' => Sprint::factory()->create(['project_id' => $this->project->id])->id,
+            ];
+
+            $this->postJson(route('user_stories.store', [
+                'project' => $this->project,
+            ]), $data)
+                ->assertCreated();
+
+            $this->assertDatabaseCount(UserStory::class, $key + 1);
+            $this->assertDatabaseHas(UserStory::class, [...$data, 'project_id' => $this->project->id]);
+        }
+    }
+}
