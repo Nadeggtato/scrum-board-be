@@ -117,4 +117,38 @@ class UserStoryControllerTest extends BaseProjectTest
             $this->assertDatabaseHas(UserStory::class, [...$data, 'id' => $this->userStory->id]);
         }
     }
+
+    public function test_non_members_cant_delete_user_story(): void
+    {
+        Sanctum::actingAs($this->nonMember);
+
+        $this->deleteJson(route('user_stories.delete', [
+            'project' => $this->project,
+            'userStory' => $this->userStory,
+        ]))->assertForbidden();
+    }
+
+    public function test_delete_user_story_endpoint(): void
+    {
+        Sanctum::actingAs($this->developer);
+
+        $this->deleteJson(route('user_stories.delete', [
+            'project' => $this->project,
+            'userStory' => $this->userStory,
+        ]))->assertOk();
+
+        $this->assertDatabaseCount(UserStory::class, 1);
+        $this->assertSoftDeleted(UserStory::class, ['id' => $this->userStory->id]);
+
+        Sanctum::actingAs($this->projectManager);
+        $userStoryB = UserStory::factory()->create(['project_id' => $this->project->id]);
+
+        $this->deleteJson(route('user_stories.delete', [
+            'project' => $this->project,
+            'userStory' => $userStoryB,
+        ]))->assertOk();
+
+        $this->assertDatabaseCount(UserStory::class, 2);
+        $this->assertSoftDeleted(UserStory::class, ['id' => $userStoryB->id]);
+    }
 }
