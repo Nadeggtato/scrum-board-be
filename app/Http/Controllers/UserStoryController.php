@@ -68,7 +68,7 @@ class UserStoryController extends ApiController
 
         return Response::json(
             new UserStoryResource($userStory->refresh()),
-            ResponseCode::HTTP_CREATED
+            ResponseCode::HTTP_OK
         );
     }
 
